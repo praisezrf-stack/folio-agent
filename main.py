@@ -1,6 +1,9 @@
-def main():
-    print("Hello from lucklab!")
+from fastapi import FastAPI
 
 
-if __name__ == "__main__":
-    main()
+
+app = FastAPI()
+
+@app.get("/health")
+def health():
+    return {'status':'ok'}
