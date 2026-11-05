@@ -1,6 +1,4 @@
 from fastapi import FastAPI
-from src.scripts.check_env import main
-
 
 
 # app = FastAPI()
@@ -9,5 +7,3 @@ from src.scripts.check_env import main
 # def health():
 #     return {'status':'ok'}
 
-
-main()
