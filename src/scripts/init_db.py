@@ -11,7 +11,7 @@ PG_DSN 从 .env 读，别写死——和模型网关同一个道理
 """
 
 import psycopg
-from ..folioAgent.config import require_env
+from folioAgent.config import require_env
 
 
 def init_db():
@@ -23,7 +23,7 @@ CREATE EXTENSION IF NOT EXISTS vector;
 """)
             # 创建documents
             cur.execute("""
-CREATE EXTENSION IF NOT EXISTS documents (
+CREATE TABLE IF NOT EXISTS documents (
 id BIGSERIAL PRIMARY KEY,
 filename TEXT NOT NULL,
 source_path TEXT NOT NULL,
@@ -44,7 +44,7 @@ embedding vector(1024)
             cur.execute("""
 CREATE INDEX IF NOT EXISTS chunks_embedding_idx
 ON chunks
-SING hnsw (embedding vector_cosine_ops)
+USING hnsw (embedding vector_cosine_ops)
 """)
 
 init_db()
