@@ -78,13 +78,20 @@ def find_upload_status(batch_id)->str|None:
 
 # 下载zip包并解析
 def download_and_show(zip_url):
-    url =requests.get(zip_url)
-    with ZipFile(io.BytesIO(url.content),"r") as z:
+    zip =requests.get(zip_url)
+    with ZipFile(io.BytesIO(zip.content),"r") as z:
         files = z.namelist()
+        content_list = [z.read(file).decode("utf-8") for file in files if file.endswith('.md')]
+        return content_list
 
+# 切片
+def splitter_loader(content):
+    pass
 
 def main():
     result:dict = upload_files()
     if result['code']==200:
         batch_id = result['batch_id']
         zip_url = find_upload_status(batch_id)
+        if zip_url:
+            download_and_show(zip_url)
