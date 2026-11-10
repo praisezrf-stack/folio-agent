@@ -1,8 +1,7 @@
 """
 检索
-核心就一行 SQL 的知识：
 
-sql
+核心就一行 SQL 的知识：
 
 SELECT content, 1 - (embedding <=> %s::vector) AS similarity
 FROM chunks ORDER BY embedding <=> %s::vector LIMIT 3
@@ -11,3 +10,34 @@ FROM chunks ORDER BY embedding <=> %s::vector LIMIT 3
 查询文本和入库文本必须用同一个 get_embedder() 实例产出的向量，模型不同则向量空间不兼容
 验收标准：问“什么是 StateGraph？”，返回的第一条必须是讲 LangGraph 的那句，相似度明显高（比如 0.5+ 对 0.1 这种量级差）。
 """
+
+import psycopg
+from folioAgent.llm.gateway import get_embedder
+from folioAgent.config import require_env
+
+
+def main():
+    emb = get_embedder()
+
+    # 问题转向量
+    user = "什么是StateGraph？"
+
+    emb_result = emb.embed_query(user)
+
+    # 检索
+    with psycopg.connect(require_env('PG_DSN')) as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+    SELECT content,
+        1 - (embedding <=> %s::vector) AS similarity
+    FROM chunks
+    WHERE 1 - (embedding <=> %s::vector)>=0.7
+    ORDER BY embedding <=> %s::vector
+    LIMIT 3
+    """,(str(emb_result),str(emb_result),str(emb_result)))
+
+            results = cur.fetchall()
+            for result in results:
+                print(result)
+if __name__=="__main__":
+    main()
