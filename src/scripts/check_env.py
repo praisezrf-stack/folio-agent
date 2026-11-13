@@ -1,4 +1,4 @@
-from ..folioAgent.llm.gateway import create_model,get_embedder
+from folioAgent.llm.gateway import create_model,get_embedder
 
 chat = create_model()
 emb = get_embedder()
