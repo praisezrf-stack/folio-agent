@@ -12,23 +12,33 @@ from folioAgent.rag.splitter import splitter_loader
 from folioAgent.db.ingestion_repository import save_chunks, save_doc
 from folioAgent.db.store import get_db_connect
 from folioAgent.llm.gateway import get_embedder
-
+from folioAgent.config import get_doc
+from folioAgent.config import upload_url
+from pathlib import Path
 
 
 def parse_doc():
     with get_db_connect() as conn:
-        document_id = save_doc(conn)
-        print("=== 文档存储完成 ===")
-    # 解析文档并切片
-    content_list: list = parser()
+        document_ids = save_doc(conn, upload_url)
+        print("=== 文档存储完成 ===", document_ids)
+    n_md = []
+    content_list = []
+    for file in upload_url:
+        url = Path(file.get("url"))
+        if url.suffix != ".md":
+            n_md.append(file)
+        else:
+            content_list.append({"content": url.read_text(encoding="utf-8")})
+    # 批量解析文档并切片
+    content_list.extend(parser(n_md))
     print(f"=== 文件解析完成 ===")
     # 存储文档
 
-    for content in content_list:
+    for i, content in enumerate(content_list):
         title, embedded_chunks = splitter_loader(content["content"])
         data = [
             (
-                document_id,
+                document_ids[i][0],
                 chunk["chunk_content"],
                 str(chunk["vector"]),
                 index,
@@ -41,25 +51,32 @@ def parse_doc():
 
 
 if __name__ == "__main__":
+    # 获取文档
+    get_doc()
+    # 文档上传并切片
     parse_doc()
     # 测试集
-    q = [
+    question = [
         "怎么让模型自己判断要不要调用工具，并在工具执行完后继续回答？",
         "用户上一轮告诉了模型自己的名字，下一轮怎样让模型还记得？",
         "怎么让程序执行到一半先暂停，等人工审核通过后再接着执行？",
         "为什么每次收到新消息，之前的聊天记录就被覆盖了？该怎么保留？",
     ]
     emb = get_embedder()
-    emb_result = emb.embed_documents(q)
+    emb_result = emb.embed_documents(question)
     with get_db_connect() as conn:
         with conn.cursor() as cur:
-           cur.execute("""
-               SELECT content,
-                   1 - (embedding <=> %s::vector) AS similarity
-               FROM chunks
-               WHERE 1 - (embedding <=> %s::vector)>=0.7
-               ORDER BY embedding <=> %s::vector
-               LIMIT 3
-               """,(str(emb_result),str(emb_result),str(emb_result)))
-           
-       
+            for q in emb_result:
+                cur.execute(
+                    """
+                              SELECT content,
+                              1 - (embedding <=> %s::vector)
+                              FROM chunks
+                              WHERE 1 - (embedding <=> %s::vector) >=0.7
+                              ORDER BY embedding <=> %s::vector
+                              LIMIT 3
+                              """,
+                    (str(q), str(q), str(q)),
+                )
+                result = cur.fetchall()
+                print(f"最终结果：{result}")

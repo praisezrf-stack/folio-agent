@@ -2,8 +2,7 @@
 
 from folioAgent.config import require_env
 from zipfile import ZipFile
-from folioAgent.config import upload_url
-import requests, time, io
+import requests, time, io,pathlib
 
 TOKEN = require_env("MINERU_API_KEY")
 header = {"Content-type": "application/json", "Authorization": f"Bearer {TOKEN}"}
@@ -11,7 +10,7 @@ results = []
 
 
 # 上传文件
-def upload_files() -> dict[str, str | int | list]:
+def upload_files(upload_url) -> dict[str, str | int | list]:
     url = require_env("MINERU_URL") + "/v4/file-urls/batch"
 
     data = {
@@ -20,6 +19,7 @@ def upload_files() -> dict[str, str | int | list]:
         ],
         "model_version": "vlm",
     }
+    print("===data ===", data)
     try:
         response = requests.post(url, headers=header, json=data)
         response.raise_for_status()
@@ -28,7 +28,7 @@ def upload_files() -> dict[str, str | int | list]:
         if file_upload_result["code"] != 0:
             print(f"上传文件失败:{file_upload_result['msg']}")
             return {"code": 403, "msg": f"上传文件失败:{file_upload_result['msg']}"}
-       
+
         data = file_upload_result["data"]
         batch_id = data["batch_id"]
         file_urls = data["file_urls"]
@@ -55,7 +55,7 @@ def upload_files() -> dict[str, str | int | list]:
         }
 
     except Exception as err:
-        print(err,'err')
+        print(err, "err")
         return {"code": 403, "msg": f"上传文件失败:{err}"}
 
 
@@ -95,9 +95,12 @@ def download_and_show(zip_url):
         return content_list
 
 
-def parser() -> list:
-    result: dict = upload_files()
-    content_list = [] # [{"data_id":1212,"content":[]}]
+def parser(upload_url) -> list:
+    n_md = []
+    content_list = []
+   
+    result: dict = upload_files(upload_url)
+    # [{"data_id":1212,"content":[]}]
     if result["code"] == 200:
         batch_id = result["batch_id"]
         extract_result = find_upload_status(batch_id)

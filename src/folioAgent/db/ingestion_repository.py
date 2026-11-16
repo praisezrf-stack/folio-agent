@@ -2,10 +2,9 @@ from folioAgent.config import require_env
 from folioAgent.config import upload_url
 
 
-
-def save_chunks(connect,data):
+def save_chunks(connect, data):
     """存储chunks"""
-    print('=== 开始存储chunks ===')
+    print("=== 开始存储chunks ===")
     with connect.cursor() as cur:
         cur.executemany(
             """
@@ -14,9 +13,10 @@ def save_chunks(connect,data):
     """,
             data,
         )
-        print('完成')
+        print("完成")
 
-def save_doc(connect):
+
+def save_doc(connect, upload_url):
     with connect.cursor() as cur:
         data = [(file.get("name", ""), file.get("url", "")) for file in upload_url]
         source_path = [(d[1],) for d in data]
@@ -36,8 +36,13 @@ def save_doc(connect):
     RETURNING id
     """,
             data,
-            returning=True
+            returning=True,
         )
-        result = cur.fetchone()
-
-        return result[0]
+        document_ids = []
+        if data:
+            while True:
+                row = cur.fetchall()
+                document_ids.append(row[0])
+                if not cur.nextset():
+                    break
+        return document_ids
