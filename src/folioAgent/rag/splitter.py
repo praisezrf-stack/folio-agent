@@ -23,7 +23,12 @@ def splitter_loader(content):
     # 正则匹配，去掉content中的\\_，因为thread_id会被转成thread\\_id
     content = re.sub(r"\\+_", "_", content)
     md_splitter = ExperimentalMarkdownSyntaxTextSplitter(
-        headers_to_split_on=[("#", "一级标题"), ("##", "二级标题")]
+        headers_to_split_on=[
+            ("#", "一级标题"),
+            ("##", "二级标题"),
+            ("###", "三级标题"),
+            ("####", "四级标题"),
+        ]
     )
 
     # 递归字符串分割器
@@ -41,12 +46,14 @@ def splitter_loader(content):
         chunk_overlap=100,
     )
     docs = md_splitter.split_text(content)
-    title = ""
     embedded_chunks = []
     for doc in docs:
-        if not title:
-            title = doc.metadata.get("一级标题")
-        headings = [doc.metadata.get("一级标题", ""), doc.metadata.get("二级标题", "")]
+        headings = [
+            doc.metadata.get("一级标题", ""),
+            doc.metadata.get("二级标题", ""),
+            doc.metadata.get("三级标题", ""),
+            doc.metadata.get("四级标题", ""),
+        ]
         prefix = "\n\n".join(headings)
         page_content = doc.page_content
         if len(page_content) > 1200 and "Code" not in doc.metadata:
@@ -61,7 +68,7 @@ def splitter_loader(content):
                     "chunk_content": chunk_content,
                 }
             )
-    return title, embedded_chunks
+    return embedded_chunks
 
 
 if __name__ == "__main__":

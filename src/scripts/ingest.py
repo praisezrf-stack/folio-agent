@@ -11,34 +11,46 @@ from folioAgent.rag.parser import parser
 from folioAgent.rag.splitter import splitter_loader
 from folioAgent.db.ingestion_repository import save_chunks, save_doc
 from folioAgent.db.store import get_db_connect
-from folioAgent.llm.gateway import get_embedder
+
+# from folioAgent.llm.gateway import get_embedder, create_model
 from folioAgent.config import get_doc
-from folioAgent.config import upload_url
 from pathlib import Path
 
 
-def parse_doc():
+def parse_doc(upload_url):
     with get_db_connect() as conn:
         document_ids = save_doc(conn, upload_url)
         print("=== 文档存储完成 ===", document_ids)
     n_md = []
     content_list = []
-    for file in upload_url:
+    for index, file in enumerate(upload_url):
         url = Path(file.get("url"))
         if url.suffix != ".md":
-            n_md.append(file)
+            content = parser(
+                {
+                    "name": file.get("name", ""),
+                    "url": url,
+                    "data_id": str(document_ids[index][0]),
+                }
+            )
+            content_list.extend(content)
         else:
-            content_list.append({"content": url.read_text(encoding="utf-8")})
+            content_list.append(
+                {
+                    "content": url.read_text(encoding="utf-8"),
+                    "data_id": document_ids[index][0],
+                }
+            )
     # 批量解析文档并切片
-    content_list.extend(parser(n_md))
+
     print(f"=== 文件解析完成 ===")
     # 存储文档
-
+    print("=== 开始存储chunks ===")
     for i, content in enumerate(content_list):
-        title, embedded_chunks = splitter_loader(content["content"])
+        embedded_chunks = splitter_loader(content["content"])
         data = [
             (
-                document_ids[i][0],
+                content['data_id'],
                 chunk["chunk_content"],
                 str(chunk["vector"]),
                 index,
@@ -52,31 +64,6 @@ def parse_doc():
 
 if __name__ == "__main__":
     # 获取文档
-    get_doc()
+    upload_url = get_doc()
     # 文档上传并切片
-    parse_doc()
-    # 测试集
-    question = [
-        "怎么让模型自己判断要不要调用工具，并在工具执行完后继续回答？",
-        "用户上一轮告诉了模型自己的名字，下一轮怎样让模型还记得？",
-        "怎么让程序执行到一半先暂停，等人工审核通过后再接着执行？",
-        "为什么每次收到新消息，之前的聊天记录就被覆盖了？该怎么保留？",
-    ]
-    emb = get_embedder()
-    emb_result = emb.embed_documents(question)
-    with get_db_connect() as conn:
-        with conn.cursor() as cur:
-            for q in emb_result:
-                cur.execute(
-                    """
-                              SELECT content,
-                              1 - (embedding <=> %s::vector)
-                              FROM chunks
-                              WHERE 1 - (embedding <=> %s::vector) >=0.7
-                              ORDER BY embedding <=> %s::vector
-                              LIMIT 3
-                              """,
-                    (str(q), str(q), str(q)),
-                )
-                result = cur.fetchall()
-                print(f"最终结果：{result}")
+    parse_doc(upload_url)

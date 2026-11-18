@@ -1,10 +1,5 @@
-from folioAgent.config import require_env
-from folioAgent.config import upload_url
-
-
 def save_chunks(connect, data):
     """存储chunks"""
-    print("=== 开始存储chunks ===")
     with connect.cursor() as cur:
         cur.executemany(
             """
@@ -46,3 +41,23 @@ def save_doc(connect, upload_url):
                 if not cur.nextset():
                     break
         return document_ids
+
+
+def find_chunks(connect, emb_result):
+    with connect.cursor() as cur:
+        cur.execute(
+            """
+                    SELECT c.content,
+                    c.chunk_index,
+                    d.filename,
+                    1 - (embedding <=> %s::vector)
+                    FROM chunks AS c
+                    JOIN documents AS d ON c.document_id = d.id
+                    WHERE 1 - (embedding <=> %s::vector) >=0.5
+                    ORDER BY embedding <=> %s::vector
+                    LIMIT 5
+                    """,
+            (str(emb_result), str(emb_result), str(emb_result)),
+        )
+        result = cur.fetchall()
+        return result

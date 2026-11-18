@@ -2,7 +2,7 @@
 
 from folioAgent.config import require_env
 from zipfile import ZipFile
-import requests, time, io,pathlib
+import requests, time, io, pathlib
 
 TOKEN = require_env("MINERU_API_KEY")
 header = {"Content-type": "application/json", "Authorization": f"Bearer {TOKEN}"}
@@ -10,16 +10,14 @@ results = []
 
 
 # 上传文件
-def upload_files(upload_url) -> dict[str, str | int | list]:
+def upload_files(upload_url: dict) -> dict[str, str | int | list]:
     url = require_env("MINERU_URL") + "/v4/file-urls/batch"
+    files = [{"name": upload_url.get("name"), "data_id": upload_url.get("data_id")}]
 
     data = {
-        "files": [
-            {"name": files["name"], "data_id": files["data_id"]} for files in upload_url
-        ],
+        "files": files,
         "model_version": "vlm",
     }
-    print("===data ===", data)
     try:
         response = requests.post(url, headers=header, json=data)
         response.raise_for_status()
@@ -36,10 +34,10 @@ def upload_files(upload_url) -> dict[str, str | int | list]:
         upload_errors = []
 
         for index, file_url in enumerate(file_urls):
-            with open(upload_url[index]["url"], "rb") as f:
+            with open(upload_url.get("url"), "rb") as f:
                 upload_response = requests.put(file_url, data=f)
                 if upload_response.status_code != 200:
-                    upload_errors.append(upload_url[index]["name"])
+                    upload_errors.append(upload_url.get("name"))
 
         return {
             "code": 200,
@@ -95,10 +93,8 @@ def download_and_show(zip_url):
         return content_list
 
 
-def parser(upload_url) -> list:
-    n_md = []
+def parser(upload_url: dict) -> list:
     content_list = []
-   
     result: dict = upload_files(upload_url)
     # [{"data_id":1212,"content":[]}]
     if result["code"] == 200:

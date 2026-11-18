@@ -5,29 +5,29 @@ Downloaded: 2026-11-16 19:21:15 Asia/Shanghai
 Original-Language: English
 -->
 
-> ## Documentation Index
-> Fetch the complete documentation index at: https://docs.langchain.com/llms.txt
-> Use this file to discover all available pages before exploring further.
+> ## 文档索引
+> 完整文档索引：https://docs.langchain.com/llms.txt
+> 在进一步阅读之前，可使用此文件发现所有可用页面。
 
-# Tools
+# 工具
 
-> Define tools that let LangChain agents fetch real-time data, execute code, query external databases, and take actions.
+> 定义工具，让 LangChain 智能体能够获取实时数据、执行代码、查询外部数据库并采取行动。
 
-Tools extend what [agents](https://docs.langchain.com/oss/python/langchain/agents.md) can do—letting them fetch real-time data, execute code, query external databases, and take actions in the world.
+工具扩展了[智能体](https://docs.langchain.com/oss/python/langchain/agents.md)的能力，让它们能够获取实时数据、执行代码、查询外部数据库，并在现实世界中采取行动。
 
-Under the hood, tools are callable functions with well-defined inputs and outputs that get passed to a [chat model](https://docs.langchain.com/oss/python/langchain/models.md). The model decides when to invoke a tool based on the conversation context, and what input arguments to provide.
+从底层看，工具是输入和输出定义明确的可调用函数，它们会被传给[聊天模型](https://docs.langchain.com/oss/python/langchain/models.md)。模型根据对话上下文决定何时调用工具，以及提供哪些输入参数。
 
 > [!TIP]
 >
-> For details on how models handle tool calls, see [Tool calling](https://docs.langchain.com/oss/python/langchain/models.md#tool-calling). Trace tool calls and debug errors with [LangSmith](https://smith.langchain.com?utm_source=docs\&utm_medium=cta\&utm_campaign=langsmith-signup\&utm_content=oss-langchain-tools). Follow the [tracing quickstart](https://docs.langchain.com/langsmith/trace-with-langchain.md) to get set up.
+> 关于模型如何处理工具调用，参见[工具调用](https://docs.langchain.com/oss/python/langchain/models.md#tool-calling)。使用 [LangSmith](https://smith.langchain.com?utm_source=docs\&utm_medium=cta\&utm_campaign=langsmith-signup\&utm_content=oss-langchain-tools) 追踪工具调用并调试错误。按照[追踪快速入门](https://docs.langchain.com/langsmith/trace-with-langchain.md)完成设置。
 >
-> We recommend you also set up [LangSmith Engine](https://docs.langchain.com/langsmith/engine.md) which monitors your traces, detects issues, and proposes fixes.
+> 我们还建议设置 [LangSmith Engine](https://docs.langchain.com/langsmith/engine.md)，它会监控追踪记录、发现问题并提出修复建议。
 
-## Create tools
+## 创建工具
 
-### Basic tool definition
+### 基本工具定义
 
-The simplest way to create a tool is with the [`@tool`](https://reference.langchain.com/python/langchain-core/tools/convert/tool) decorator. By default, the function's docstring becomes the tool's description that helps the model understand when to use it:
+创建工具最简单的方法是使用 [`@tool`](https://reference.langchain.com/python/langchain-core/tools/convert/tool) 装饰器。默认情况下，函数的文档字符串会成为工具说明，帮助模型理解何时使用它：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool
@@ -43,21 +43,21 @@ def search_database(query: str, limit: int = 10) -> str:
     return f"Found {limit} results for '{query}'"
 ```
 
-Type hints are **required** as they define the tool's input schema. The docstring should be informative and concise to help the model understand the tool's purpose.
+类型提示是**必需的**，因为它定义工具的输入模式。文档字符串应信息充分且简洁，帮助模型理解工具用途。
 
 > [!NOTE]
 >
-> **Server-side tool use:** Some chat models feature built-in tools (web search, code interpreters) that are executed server-side. See [Server-side tool use](#server-side-tool-use) for details.
+> **服务端工具使用：**一些聊天模型提供在服务端执行的内置工具（网页搜索、代码解释器）。详情见[服务端工具使用](#server-side-tool-use)。
 
 > [!WARNING]
 >
-> Prefer `snake_case` for tool names (e.g., `web_search` instead of `Web Search`). Some model providers have issues with or reject names containing spaces or special characters with errors. Sticking to alphanumeric characters, underscores, and hyphens helps to improve compatibility across providers.
+> 工具名称优先使用 `snake_case`（例如用 `web_search` 而非 `Web Search`）。一些模型提供商无法正确处理含空格或特殊字符的名称，或会报错并拒绝它们。只使用字母、数字、下划线和连字符，有助于提高不同提供商之间的兼容性。
 
-### Customize tool properties
+### 自定义工具属性
 
-#### Custom tool name
+#### 自定义工具名称
 
-By default, the tool name comes from the function name. Override it when you need something more descriptive:
+默认工具名称来自函数名。如果需要更具描述性的名称，可以覆盖它：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 @tool("web_search")  # Custom name
@@ -68,9 +68,9 @@ def search(query: str) -> str:
 print(search.name)  # web_search
 ```
 
-#### Custom tool description
+#### 自定义工具说明
 
-Override the auto-generated tool description for clearer model guidance:
+覆盖自动生成的工具说明，更清晰地引导模型：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 @tool("calculator", description="Performs arithmetic calculations. Use this for any math problems.")
@@ -79,9 +79,9 @@ def calc(expression: str) -> str:
     return str(eval(expression))
 ```
 
-### Advanced schema definition
+### 高级模式定义
 
-Define complex inputs with Pydantic models or JSON schemas:
+使用 Pydantic 模型或 JSON 模式定义复杂输入：
 
 ```python Pydantic model theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from pydantic import BaseModel, Field
@@ -130,35 +130,35 @@ def get_weather(location: str, units: str = "celsius", include_forecast: bool = 
     return result
 ```
 
-### Reserved argument names
+### 保留的参数名称
 
-The following parameter names are reserved and cannot be used as tool arguments. Using these names will cause runtime errors.
+以下参数名称为保留名称，不能用作工具参数。使用这些名称会导致运行时错误。
 
-| Parameter name | Purpose |
+| 参数名称 | 用途 |
 | - | - |
-| `config` | Reserved for passing `RunnableConfig` to tools internally |
-| `runtime` | Reserved for `ToolRuntime` parameter (accessing state, context, store) |
+| `config` | 保留用于在内部向工具传递 `RunnableConfig` |
+| `runtime` | 保留用于 `ToolRuntime` 参数（访问状态、上下文和存储） |
 
-To access runtime information, use the [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime) parameter instead of naming your own arguments `config` or `runtime`.
+要访问运行时信息，应使用 [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime) 参数，不要将自己的参数命名为 `config` 或 `runtime`。
 
-If you use `InjectedState`, `InjectedStore`, `get_runtime()`, or `InjectedToolCallId`, see [Migrate from older injection patterns](#migrate-from-older-injection-patterns).
+如果你使用 `InjectedState`、`InjectedStore`、`get_runtime()` 或 `InjectedToolCallId`，参见[从旧注入模式迁移](#migrate-from-older-injection-patterns)。
 
-## Access context
+## 访问上下文
 
-Tools are most powerful when they can access runtime information like conversation history, user data, and persistent memory. This section covers how to access and update this information from within your tools.
+当工具能够访问对话历史、用户数据、持久记忆等运行时信息时，其能力最强。本节介绍如何在工具内部访问和更新这些信息。
 
-Tools can access runtime information through the [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime) parameter, which provides:
+工具可通过 [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime) 参数访问运行时信息，它提供：
 
-| Component | Description | Use case |
+| 组件 | 说明 | 使用场景 |
 | - | - | - |
-| **State** | Short-term memory - mutable data that exists for the current conversation (messages, counters, custom fields) | Access conversation history, track tool call counts |
-| **Context** | Immutable configuration passed at invocation time (user IDs, session info) | Personalize responses based on user identity |
-| **Store** | Long-term memory - persistent data that survives across conversations | Save user preferences, maintain knowledge base |
-| **Stream Writer** | Emit real-time updates during tool execution | Show progress for long-running operations |
-| **Execution Info** | Identity and retry information for the current execution (thread ID, run ID, attempt number) | Access thread/run IDs, adjust behavior based on retry state |
-| **Server Info** | Server-specific metadata when running on LangSmith Agent Server (assistant ID, graph ID, authenticated user) | Access assistant ID, graph ID, or authenticated user info |
-| **Config** | [`RunnableConfig`](https://reference.langchain.com/python/langchain-core/runnables/config/RunnableConfig) for the execution | Access callbacks, tags, and metadata |
-| **Tool Call ID** | Unique identifier for the current tool invocation | Correlate tool calls for logs and model invocations |
+| **状态** | 短期记忆——存在于当前对话中的可变数据（消息、计数器、自定义字段） | 访问对话历史、追踪工具调用次数 |
+| **上下文** | 调用时传入的不可变配置（用户 ID、会话信息） | 根据用户身份个性化响应 |
+| **存储** | 长期记忆——跨对话保留的持久数据 | 保存用户偏好、维护知识库 |
+| **流写入器** | 在工具执行期间发出实时更新 | 显示长时间操作的进度 |
+| **执行信息** | 当前执行的身份与重试信息（线程 ID、运行 ID、尝试次数） | 访问线程／运行 ID、根据重试状态调整行为 |
+| **服务器信息** | 在 LangSmith Agent Server 上运行时的服务器专属元数据（助手 ID、图 ID、已认证用户） | 访问助手 ID、图 ID 或已认证用户信息 |
+| **配置** | 当前执行的 [`RunnableConfig`](https://reference.langchain.com/python/langchain-core/runnables/config/RunnableConfig) | 访问回调、标签和元数据 |
+| **工具调用 ID** | 当前工具调用的唯一标识符 | 关联日志和模型调用中的工具调用 |
 
 ```mermaid theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 graph LR
@@ -209,13 +209,13 @@ graph LR
     class M,N,O,P output
 ```
 
-### Short-term memory (State)
+### 短期记忆（状态）
 
-State represents short-term memory that exists for the duration of a conversation. It includes the message history and any custom fields you define in your [graph state](https://docs.langchain.com/oss/python/langgraph/graph-api.md#state).
+状态表示在一次对话期间存在的短期记忆。它包括消息历史，以及你在[图状态](https://docs.langchain.com/oss/python/langgraph/graph-api.md#state)中定义的任意自定义字段。
 
-#### Access state
+#### 访问状态
 
-Add `runtime: ToolRuntime` to your tool signature to access state. At call time, [`ToolNode`](https://reference.langchain.com/python/langgraph/agents/#langgraph.prebuilt.tool_node.ToolNode) injects the value automatically; the parameter is not included in the tool schema sent to the model. Use `runtime.state` to read the current conversation state:
+在工具签名中添加 `runtime: ToolRuntime` 以访问状态。调用时，[`ToolNode`](https://reference.langchain.com/python/langgraph/agents/#langgraph.prebuilt.tool_node.ToolNode) 自动注入该值；发送给模型的工具模式中不包含此参数。通过 `runtime.state` 读取当前对话状态：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool, ToolRuntime
@@ -246,12 +246,12 @@ def get_user_preference(
 
 > [!WARNING]
 >
-> The `runtime` parameter is hidden from the model. For the example above, the model only sees `pref_name` in the tool schema.
+> `runtime` 参数对模型隐藏。在上方示例中，模型只能在工具模式中看到 `pref_name`。
 
-#### Update state
+#### 更新状态
 
-Use [`Command`](https://reference.langchain.com/python/langgraph/types/Command) to update the agent's state. This is useful for tools that need to update custom state fields.
-Include a `ToolMessage` in the update so the model can see the result of the tool call:
+使用 [`Command`](https://reference.langchain.com/python/langgraph/types/Command) 更新智能体状态。这适用于需要更新自定义状态字段的工具。
+在更新中包含一条 `ToolMessage`，以便模型看到工具调用结果：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.agents import AgentState
@@ -280,23 +280,23 @@ def set_user_name(new_name: str, runtime: ToolRuntime[None, CustomState]) -> Com
     )
 ```
 
-> [card] [View example trace](https://smith.langchain.com/public/d29da0cb-a0f6-4a14-b976-9f4154e46c4c/r)
+> [card] [查看示例追踪](https://smith.langchain.com/public/d29da0cb-a0f6-4a14-b976-9f4154e46c4c/r)
 >
-> Open a public LangSmith run for this example.
+> 打开此示例的公开 LangSmith 运行记录。
 
 > [!TIP]
 >
-> When tools update state variables, consider defining a [reducer](https://docs.langchain.com/oss/python/langgraph/graph-api.md#reducers) for those fields. Since LLMs can call multiple tools in parallel, a reducer determines how to resolve conflicts when the same state field is updated by concurrent tool calls.
+> 工具更新状态变量时，考虑为这些字段定义[归约函数](https://docs.langchain.com/oss/python/langgraph/graph-api.md#reducers)。由于大语言模型可以并行调用多个工具，归约函数决定并发工具调用更新同一状态字段时如何解决冲突。
 
-### Context
+### 上下文
 
-Context provides immutable configuration data that is passed at invocation time. Use it for user IDs, session details, or application-specific settings that shouldn't change during a conversation.
+上下文提供调用时传入的不可变配置数据。可用于用户 ID、会话详细信息，或在对话期间不应改变的应用专属设置。
 
 > [!NOTE]
 >
-> While `thread_id` (passed via `config={"configurable": {"thread_id": ...}}`) scopes the *conversation*: message history and checkpoints, `context` carries *per-run* data your tools and middleware read at invocation time. Persistence requires a [checkpointer](https://docs.langchain.com/oss/python/langchain/short-term-memory.md). In production you typically pass both a stable `thread_id` per conversation and a `context` object on every invoke.
+> `thread_id`（通过 `config={"configurable": {"thread_id": ...}}` 传入）确定*对话*的范围，即消息历史和检查点；`context` 则承载工具和中间件在调用时读取的*每次运行专属*数据。持久化需要[检查点保存器](https://docs.langchain.com/oss/python/langchain/short-term-memory.md)。生产环境通常为每次对话使用稳定的 `thread_id`，并在每次 invoke 时传入 `context` 对象。
 
-Access context through `runtime.context`. Configure a [checkpointer](https://docs.langchain.com/oss/python/langchain/short-term-memory.md) and pass `context` with a stable `thread_id` so the conversation persists across invocations:
+通过 `runtime.context` 访问上下文。配置[检查点保存器](https://docs.langchain.com/oss/python/langchain/short-term-memory.md)，并在传入 `context` 时使用稳定的 `thread_id`，使对话在多次调用之间持久保留：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from dataclasses import dataclass
@@ -372,19 +372,19 @@ result = agent.invoke(
 print(result["messages"][-1].content_blocks)
 ```
 
-> [card] [View example trace](https://smith.langchain.com/public/71fda0a0-84cc-4eb8-83a1-611ebbd675a5/r)
+> [card] [查看示例追踪](https://smith.langchain.com/public/71fda0a0-84cc-4eb8-83a1-611ebbd675a5/r)
 >
-> Open a public LangSmith run for this example.
+> 打开此示例的公开 LangSmith 运行记录。
 
-### Long-term memory (Store)
+### 长期记忆（存储）
 
-The [`BaseStore`](https://reference.langchain.com/python/langchain-core/stores/BaseStore) provides persistent storage that survives across conversations. Unlike state (short-term memory), data saved to the store remains available in future sessions.
+[`BaseStore`](https://reference.langchain.com/python/langchain-core/stores/BaseStore) 提供跨对话保留的持久存储。与状态（短期记忆）不同，保存到存储的数据在之后的会话中仍然可用。
 
-Access the store through `runtime.store`. The store uses a namespace/key pattern to organize data:
+通过 `runtime.store` 访问存储。存储使用命名空间／键的模式组织数据：
 
 > [!TIP]
 >
-> For production deployments, use a persistent store implementation like [`PostgresStore`](https://reference.langchain.com/python/langgraph/store/#langgraph.store.postgres.PostgresStore), `MongoDBStore`, or `RedisStore` instead of `InMemoryStore`. See the [memory documentation](https://docs.langchain.com/oss/python/langgraph/add-memory.md) for setup details.
+> 生产部署应使用 [`PostgresStore`](https://reference.langchain.com/python/langgraph/store/#langgraph.store.postgres.PostgresStore)、`MongoDBStore` 或 `RedisStore` 等持久存储实现，而不是 `InMemoryStore`。配置详情见[记忆文档](https://docs.langchain.com/oss/python/langgraph/add-memory.md)。
 
 ```python expandable theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langgraph.store.memory import InMemoryStore
@@ -432,11 +432,11 @@ agent.invoke({
 # - Email: foo@langchain.dev
 ```
 
-### Stream writer
+### 流写入器
 
-Stream real-time updates from tools during execution. This is useful for providing progress feedback to users during long-running operations.
+在工具执行期间流式发送实时更新。这适用于在长时间操作期间向用户提供进度反馈。
 
-Use `runtime.stream_writer` to emit custom updates:
+使用 `runtime.stream_writer` 发出自定义更新：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool, ToolRuntime
@@ -455,11 +455,11 @@ def get_weather(city: str, runtime: ToolRuntime) -> str:
 
 > [!NOTE]
 >
-> If you use `runtime.stream_writer` inside your tool, the tool must be invoked within a LangGraph execution context. See [Streaming](https://docs.langchain.com/oss/python/langchain/streaming.md) for more details.
+> 如果在工具内部使用 `runtime.stream_writer`，该工具必须在 LangGraph 执行上下文中调用。更多详情参见[流式输出](https://docs.langchain.com/oss/python/langchain/streaming.md)。
 
-### Execution info
+### 执行信息
 
-Access thread ID, run ID, and retry state from within a tool via `runtime.execution_info`:
+在工具中通过 `runtime.execution_info` 访问线程 ID、运行 ID 和重试状态：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool, ToolRuntime
@@ -475,11 +475,11 @@ def log_execution_context(runtime: ToolRuntime) -> str:
 
 > [!NOTE]
 >
-> Requires `deepagents>=0.5.0` (or `langgraph>=1.1.5`).
+> 需要 `deepagents>=0.5.0`（或 `langgraph>=1.1.5`）。
 
-### Server info
+### 服务器信息
 
-When your tool runs on Agent Server, access the assistant ID, graph ID, and authenticated user via `runtime.server_info`:
+工具在 Agent Server 上运行时，通过 `runtime.server_info` 访问助手 ID、图 ID 和已认证用户：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool, ToolRuntime
@@ -495,17 +495,17 @@ def get_assistant_scoped_data(runtime: ToolRuntime) -> str:
     return "done"
 ```
 
-`server_info` is `None` when the tool is not running on Agent Server (e.g., during local development or testing).
+当工具不在 Agent Server 上运行时（例如本地开发或测试），`server_info` 为 `None`。
 
 > [!NOTE]
 >
-> Requires `deepagents>=0.5.0` (or `langgraph>=1.1.5`).
+> 需要 `deepagents>=0.5.0`（或 `langgraph>=1.1.5`）。
 
-> [accordion] Migrate from older injection patterns
+> [accordion] 从旧注入模式迁移
 >
-> Older examples used `InjectedState`, `InjectedStore`, `get_runtime()`, or `InjectedToolCallId`. Use [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime) instead for one explicit interface to state, context, store, and execution metadata.
+> 较早的示例使用 `InjectedState`、`InjectedStore`、`get_runtime()` 或 `InjectedToolCallId`。请改用 [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime)，通过一个显式接口统一访问状态、上下文、存储和执行元数据。
 >
-> #### Previous pattern
+> #### 旧模式
 >
 > ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 > from langchain.tools import tool, InjectedState
@@ -517,7 +517,7 @@ def get_assistant_scoped_data(runtime: ToolRuntime) -> str:
 >     return f"Conversation length: {len(messages)} messages."
 > ```
 >
-> #### Recommended pattern
+> #### 推荐模式
 >
 > ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 > from langchain.tools import tool, ToolRuntime
@@ -529,25 +529,25 @@ def get_assistant_scoped_data(runtime: ToolRuntime) -> str:
 >     return f"Conversation length: {len(messages)} messages."
 > ```
 >
-> For agent-level migrations (for example `create_react_agent` and custom state), see the [LangChain v1 migration guide](https://docs.langchain.com/oss/python/migrate/langchain-v1.md).
+> 智能体级迁移（例如 `create_react_agent` 和自定义状态）参见 [LangChain v1 迁移指南](https://docs.langchain.com/oss/python/migrate/langchain-v1.md)。
 
-## Tool execution
+## 工具执行
 
-In LangChain, tools are used by agents (for example via [`create_agent`](https://reference.langchain.com/python/langchain/agents/factory/create_agent)) and tool error handling is configured through [middleware](https://docs.langchain.com/oss/python/langchain/middleware.md).
+在 LangChain 中，工具由智能体使用（例如通过 [`create_agent`](https://reference.langchain.com/python/langchain/agents/factory/create_agent)），工具错误处理通过[中间件](https://docs.langchain.com/oss/python/langchain/middleware.md)配置。
 
-For LangGraph workflows, tool execution is handled by [`ToolNode`](https://reference.langchain.com/python/langgraph/agents/#langgraph.prebuilt.tool_node.ToolNode). See [ToolNode](https://docs.langchain.com/oss/python/langgraph/workflows-agents.md#toolnode) for Graph API usage, including how tools can access the current graph state and run-scoped context.
+对于 LangGraph 工作流，工具执行由 [`ToolNode`](https://reference.langchain.com/python/langgraph/agents/#langgraph.prebuilt.tool_node.ToolNode) 处理。Graph API 用法参见 [ToolNode](https://docs.langchain.com/oss/python/langgraph/workflows-agents.md#toolnode)，其中包括工具如何访问当前图状态及运行范围内的上下文。
 
-### Tool return values
+### 工具返回值
 
-You can choose different return values for your tools:
+可以为工具选择不同的返回值：
 
-* Return a `string` for human-readable results.
-* Return an `object` for structured results the model should parse.
-* Return a `Command` with optional message when you need to write to state.
+* 返回 `string`，用于人类可读的结果。
+* 返回 `object`，用于需要模型解析的结构化结果。
+* 需要写入状态时，返回 `Command`，并可附带消息。
 
-#### Return a string
+#### 返回字符串
 
-Return a string when the tool should provide plain text for the model to read and use in its next response.
+当工具应提供纯文本，供模型读取并在下一次响应中使用时，返回字符串。
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool
@@ -559,21 +559,21 @@ def get_weather(city: str) -> str:
     return f"It is currently sunny in {city}."
 ```
 
-> [card] [View example trace](https://smith.langchain.com/public/9c20937f-20e4-4ed2-adfa-eeda6fd63997/r)
+> [card] [查看示例追踪](https://smith.langchain.com/public/9c20937f-20e4-4ed2-adfa-eeda6fd63997/r)
 >
-> Open a public LangSmith run for this example.
+> 打开此示例的公开 LangSmith 运行记录。
 
-Behavior:
+行为：
 
-* The return value is converted to a `ToolMessage`.
-* The model sees that text and decides what to do next.
-* No agent state fields are changed unless the model or another tool does so later.
+* 返回值被转换为 `ToolMessage`。
+* 模型看到文本后决定下一步操作。
+* 不会更改智能体状态字段，除非模型或另一个工具之后这样做。
 
-Use this when the result is naturally human-readable text.
+当结果天然就是人类可读文本时，使用此方式。
 
-#### Return an object
+#### 返回对象
 
-Return an object (for example, a `dict`) when your tool produces structured data that the model should inspect.
+当工具产生需要模型检查的结构化数据时，返回对象（例如 `dict`）。
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool
@@ -589,21 +589,21 @@ def get_weather_data(city: str) -> dict:
     }
 ```
 
-> [card] [View example trace](https://smith.langchain.com/public/2f82d8ae-bcf6-4b6d-94ee-0d724c30fa98/r)
+> [card] [查看示例追踪](https://smith.langchain.com/public/2f82d8ae-bcf6-4b6d-94ee-0d724c30fa98/r)
 >
-> Open a public LangSmith run for this example.
+> 打开此示例的公开 LangSmith 运行记录。
 
-Behavior:
+行为：
 
-* The object is serialized and sent back as tool output.
-* The model can read specific fields and reason over them.
-* Like string returns, this does not directly update graph state.
+* 对象被序列化，并作为工具输出返回。
+* 模型可以读取特定字段并据此推理。
+* 与返回字符串类似，这不会直接更新图状态。
 
-Use this when downstream reasoning benefits from explicit fields instead of free-form text.
+当后续推理更适合使用明确字段而非自由文本时，使用此方式。
 
-#### Return multimodal content
+#### 返回多模态内容
 
-Tools are not limited to plain text. When the model supports multimodal tool results, the tool can return [standard content blocks](https://docs.langchain.com/oss/python/langchain/messages.md#standard-content-blocks) so the model receives text, images, and other media in one tool result.
+工具并不限于纯文本。模型支持多模态工具结果时，工具可以返回[标准内容块](https://docs.langchain.com/oss/python/langchain/messages.md#standard-content-blocks)，使模型在一次工具结果中接收文本、图像及其他媒体。
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool
@@ -618,23 +618,23 @@ def capture_screenshot() -> list[dict]:
     ]
 ```
 
-Behavior:
+行为：
 
-* The return value is converted to a `ToolMessage` with multimodal `content`.
-* Use `message.content_blocks` to read the normalized block list after the tool runs.
-* The model must support the modalities you return. Check your [model's capabilities](https://docs.langchain.com/oss/python/integrations/chat.md) before returning images, audio, or video.
+* 返回值被转换为带有多模态 `content` 的 `ToolMessage`。
+* 工具运行后，使用 `message.content_blocks` 读取归一化的内容块列表。
+* 模型必须支持所返回的模态。返回图像、音频或视频前，请检查[模型能力](https://docs.langchain.com/oss/python/integrations/chat.md)。
 
-For block types and provider-specific requirements, see [Multimodal messages](https://docs.langchain.com/oss/python/langchain/messages.md#multimodal).
+块类型与提供商特有要求参见[多模态消息](https://docs.langchain.com/oss/python/langchain/messages.md#multimodal)。
 
-MCP tools that return images or mixed content are converted the same way. See [Multimodal content](https://docs.langchain.com/oss/python/langchain/mcp/tools.md#multimodal-content).
+返回图像或混合内容的 MCP 工具也以相同方式转换。参见[多模态内容](https://docs.langchain.com/oss/python/langchain/mcp/tools.md#multimodal-content)。
 
-#### Return a Command
+#### 返回 Command
 
-Return a [`Command`](https://reference.langchain.com/python/langgraph/types/Command) when the tool needs to update graph state (for example, setting user preferences or app state).
-When the `Command` targets the current graph, include a `ToolMessage` in the update whose tool call ID matches the current tool call.
-Every tool call in the message history must have a corresponding `ToolMessage`.
+工具需要更新图状态（例如设置用户偏好或应用状态）时，返回 [`Command`](https://reference.langchain.com/python/langgraph/types/Command)。
+当 `Command` 的目标为当前图时，在更新中包含一条工具调用 ID 与当前调用匹配的 `ToolMessage`。
+消息历史中的每个工具调用都必须有对应的 `ToolMessage`。
 
-Use `runtime.tool_call_id` for the `tool_call_id` parameter. `ToolNode` enforces this requirement: if the update has no `ToolMessage` matching the tool call, it raises a `ValueError`.
+使用 `runtime.tool_call_id` 作为 `tool_call_id` 参数。`ToolNode` 强制执行此要求：若更新中没有与工具调用匹配的 `ToolMessage`，就会抛出 `ValueError`。
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.messages import ToolMessage
@@ -658,17 +658,17 @@ def set_language(language: str, runtime: ToolRuntime) -> Command:
     )
 ```
 
-Behavior:
+行为：
 
-* The command updates state using `update`.
-* Updated state is available to subsequent steps in the same run.
-* Use reducers for fields that may be updated by parallel tool calls.
+* 命令使用 `update` 更新状态。
+* 更新后的状态可供同一次运行中的后续步骤使用。
+* 对可能被并行工具调用更新的字段使用归约函数。
 
-Use this when the tool is not just returning data, but also mutating agent state.
+当工具不仅返回数据，还修改智能体状态时，使用此方式。
 
-#### Return directly from a tool
+#### 从工具直接返回
 
-Set return direct on a tool to short-circuit the agent loop: the agent returns the tool's output to the caller immediately, without sending it back through the model for further processing.
+在工具上设置直接返回，以短路智能体循环：智能体立即将工具输出返回给调用方，不再将结果送回模型作进一步处理。
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.agents import create_agent
@@ -695,33 +695,33 @@ result = agent.invoke({
 # "Order 12345 is shipped and will arrive in 2 days."
 ```
 
-> [card] [View example trace](https://smith.langchain.com/public/0a2f53f6-eaea-4092-b86b-c4e0a41998bc/r)
+> [card] [查看示例追踪](https://smith.langchain.com/public/0a2f53f6-eaea-4092-b86b-c4e0a41998bc/r)
 >
-> Open a public LangSmith run for this example.
+> 打开此示例的公开 LangSmith 运行记录。
 
-Behavior:
+行为：
 
-* The tool executes normally and its output is wrapped in a `ToolMessage`.
-* The agent stops looping and returns the tool's output as the final response, bypassing any additional model call.
-* **Multiple parallel tool calls:** When the model calls several tools in one step, all of them execute first. After all tools finish, the agent routes to `END` only if **every** tool in that batch has `return_direct=True`. The final response includes the `ToolMessage` outputs of every tool that was called in that step.
+* 工具正常执行，输出包装为 `ToolMessage`。
+* 智能体停止循环，将工具输出作为最终响应返回，跳过额外模型调用。
+* **多个并行工具调用：**模型在一个步骤中调用多个工具时，会先执行全部工具。所有工具结束后，只有该批次中**每个**工具都设置了 `return_direct=True`，智能体才会路由到 `END`。最终响应包含该步骤调用的所有工具的 `ToolMessage` 输出。
 
-Use this when:
+适用情况：
 
-* The tool's output is the complete, user-ready answer (for example, a lookup that returns a ready-to-display result).
-* You want to avoid an extra model call when no additional reasoning is needed.
-* You need deterministic, unmodified output: the model cannot rephrase, summarize, or act on the tool result.
+* 工具输出就是完整、可直接交付用户的答案（例如返回可直接展示结果的查询）。
+* 不需要额外推理时，希望避免额外模型调用。
+* 需要确定性、未经修改的输出：模型不能改写、总结工具结果，也不能据此采取行动。
 
 > [!WARNING]
 >
-> Because the model does not process the tool's output, `return_direct=True` is not suitable for tools whose results require further reasoning, summarization, or chaining with other tool calls.
+> 由于模型不会处理工具输出，`return_direct=True` 不适用于结果仍需进一步推理、总结或与其他工具调用串联的工具。
 
 > [!WARNING]
 >
-> **Mixed parallel calls:** If the model calls a `return_direct=True` tool alongside tools that do not have `return_direct=True`, the agent does **not** exit after that step. It routes back to the model with every `ToolMessage` from the batch, so the model can reason over all results. `return_direct` only short-circuits the loop when every tool call in the step has `return_direct=True`.
+> **混合并行调用：**如果模型同时调用一个 `return_direct=True` 工具和其他未设置 `return_direct=True` 的工具，智能体**不会**在该步骤后退出。它会带着该批次的所有 `ToolMessage` 返回模型，让模型对全部结果进行推理。只有该步骤的每次工具调用都设置 `return_direct=True` 时，`return_direct` 才会短路循环。
 
-#### Return a Command with return\_direct
+#### 同时使用 Command 与 return\_direct
 
-A tool with `return_direct=True` can also return a [`Command`](https://reference.langchain.com/python/langgraph/types/Command) to update graph state before the agent exits. Unlike a plain return value, a `Command` is not automatically converted into a `ToolMessage`. When the `Command` targets the current graph (`graph` is not set or is `None`), include a `ToolMessage` in `Command.update` matching the tool call's `tool_call_id`. Omitting it causes `ToolNode` to raise a `ValueError`, because every `AIMessage` tool call must have a corresponding `ToolMessage` in the message history.
+设置了 `return_direct=True` 的工具也可以返回 [`Command`](https://reference.langchain.com/python/langgraph/types/Command)，在智能体退出前更新图状态。与普通返回值不同，`Command` 不会自动转换为 `ToolMessage`。当 `Command` 的目标为当前图时（未设置 `graph` 或值为 `None`），应在 `Command.update` 中包含与该工具调用的 `tool_call_id` 匹配的 `ToolMessage`。若省略，`ToolNode` 会抛出 `ValueError`，因为消息历史中的每个 `AIMessage` 工具调用都必须有对应的 `ToolMessage`。
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.messages import ToolMessage
@@ -747,11 +747,11 @@ def fetch_and_store_order(order_id: str, runtime: ToolRuntime) -> Command:
     )
 ```
 
-To write to a parent graph instead, set `graph=Command.PARENT`. In that case the `ToolMessage` requirement is lifted because execution leaves the current graph entirely.
+若要改为写入父图，设置 `graph=Command.PARENT`。此时由于执行会完全离开当前图，因此不再要求提供 `ToolMessage`。
 
-### Error handling
+### 错误处理
 
-Handle tool errors using LangChain agent [middleware](https://docs.langchain.com/oss/python/langchain/middleware.md) to retry failed tool calls or return custom error messages:
+使用 LangChain 智能体[中间件](https://docs.langchain.com/oss/python/langchain/middleware.md)处理工具错误，重试失败的工具调用或返回自定义错误消息：
 
 ```python Google theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from collections.abc import Callable
@@ -970,9 +970,9 @@ agent = create_agent(
 )
 ```
 
-### State injection
+### 状态注入
 
-Tools access graph state through [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime). See [Access context](#access-context) for state, context, store, and streaming APIs.
+工具通过 [`ToolRuntime`](https://reference.langchain.com/python/langchain/tools/#langchain.tools.ToolRuntime) 访问图状态。状态、上下文、存储与流式 API 参见[访问上下文](#access-context)。
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.tools import tool, ToolRuntime
@@ -984,21 +984,21 @@ def get_message_count(runtime: ToolRuntime) -> str:
     return f"There are {len(messages)} messages."
 ```
 
-For more details on accessing state, context, and long-term memory from tools, see [Access context](#access-context).
+关于从工具访问状态、上下文及长期记忆的更多详情，参见[访问上下文](#access-context)。
 
-## Dynamic tool selection
+## 动态工具选择
 
-With dynamic tools, the set of tools available to the agent is modified at runtime rather than defined all upfront. Not every tool is appropriate for every situation. Too many tools may overwhelm the model (overload context) and increase errors; too few limit capabilities. Dynamic tool selection enables adapting the available toolset based on authentication state, user permissions, feature flags, or conversation stage.
+使用动态工具时，智能体可用的工具集合在运行时修改，而非预先全部固定。并非每种工具都适合所有情况。工具过多可能使模型不堪重负（上下文过载）并增加错误；工具过少又限制能力。动态工具选择允许根据认证状态、用户权限、功能开关或对话阶段调整可用工具集。
 
-There are two approaches depending on whether tools are known ahead of time:
+根据是否预先知道工具，有两种方法：
 
-> [tab] Filtering pre-registered tools
+> [tab] 筛选预注册工具
 >
-> When all possible tools are known at agent creation time, you can pre-register them and dynamically filter which ones are exposed to the model based on state, permissions, or context.
+> 若创建智能体时已知所有可能用到的工具，可以预先注册，并根据状态、权限或上下文动态筛选向模型开放的工具。
 >
-> > [tab] State
+> > [tab] 状态
 > >
-> > Enable advanced tools only after certain conversation milestones:
+> > 只有对话达到特定里程碑后才启用高级工具：
 > >
 > > ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 > > from langchain.agents import create_agent
@@ -1034,9 +1034,9 @@ There are two approaches depending on whether tools are known ahead of time:
 > > )
 > > ```
 >
-> > [tab] Store
+> > [tab] 存储
 > >
-> > Filter tools based on user preferences or feature flags in Store:
+> > 根据存储中的用户偏好或功能开关筛选工具：
 > >
 > > ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 > > from dataclasses import dataclass
@@ -1078,9 +1078,9 @@ There are two approaches depending on whether tools are known ahead of time:
 > > )
 > > ```
 >
-> > [tab] Runtime Context
+> > [tab] 运行时上下文
 > >
-> > Filter tools based on user permissions from Runtime Context:
+> > 根据运行时上下文中的用户权限筛选工具：
 > >
 > > ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 > > from dataclasses import dataclass
@@ -1127,22 +1127,22 @@ There are two approaches depending on whether tools are known ahead of time:
 > > )
 > > ```
 >
-> This approach is best when:
+> 此方法最适合：
 >
-> * All possible tools are known at compile/startup time
-> * You want to filter based on permissions, feature flags, or conversation state
-> * Tools are static but their availability is dynamic
+> * 编译／启动时已知所有可能的工具
+> * 希望根据权限、功能开关或对话状态筛选
+> * 工具本身静态，但可用性动态变化
 >
-> See [Dynamically selecting tools](https://docs.langchain.com/oss/python/langchain/middleware/custom.md#dynamically-selecting-tools) for more examples.
+> 更多示例参见[动态选择工具](https://docs.langchain.com/oss/python/langchain/middleware/custom.md#dynamically-selecting-tools)。
 
-> [tab] Runtime tool registration
+> [tab] 运行时注册工具
 >
-> When tools are discovered or created at runtime (e.g., loaded from an MCP server, generated based on user data, or fetched from a remote registry), you need to both register the tools and handle their execution dynamically.
+> 工具在运行时被发现或创建时（例如从 MCP 服务器加载、根据用户数据生成，或从远程注册中心获取），需要动态注册工具并处理其执行。
 >
-> This requires two middleware hooks:
+> 这需要两个中间件钩子：
 >
-> 1. `wrap_model_call` - Add the dynamic tools to the request
-> 2. `wrap_tool_call` - Handle execution of the dynamically added tools
+> 1. `wrap_model_call`——将动态工具添加到请求中
+> 2. `wrap_tool_call`——处理动态添加工具的执行
 >
 > ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 > from langchain.tools import tool
@@ -1183,65 +1183,65 @@ There are two approaches depending on whether tools are known ahead of time:
 > })
 > ```
 >
-> This approach is best when:
+> 此方法最适合：
 >
-> * Tools are discovered at runtime (e.g., from an MCP server)
+> * 运行时发现工具（例如来自 MCP 服务器）
 >
-> * Tools are generated dynamically based on user data or configuration
+> * 根据用户数据或配置动态生成工具
 >
-> * You're integrating with external tool registries
+> * 与外部工具注册中心集成
 >
 > > [!NOTE]
 > >
-> > The `wrap_tool_call` hook is required for runtime-registered tools because the agent needs to know how to execute tools that weren't in the original tool list. Without it, the agent won't know how to invoke the dynamically added tool.
+> > 运行时注册的工具必须使用 `wrap_tool_call` 钩子，因为智能体需要知道如何执行不在原始工具列表中的工具。没有它，智能体就不知道如何调用动态添加的工具。
 
-## Headless tools
+## 无本地实现工具（Headless tools）
 
-Some tools should run **where your user's app runs** (typically the browser), not inside the process. **Headless tools** are tool definitions, which include the name, description, and argument schema, that you register on the **server** with your agent. The **implementation** is registered only on the **client** and executed after a short interrupt/resume handshake.
+某些工具应在**用户应用运行的位置**（通常为浏览器）执行，而不是在当前进程中执行。**无本地实现工具**是你在**服务器**上随智能体注册的工具定义，包含名称、说明和参数模式。其**实现**仅在**客户端**注册，并在简短的中断／恢复握手后执行。
 
-This is different from ordinary tools whose function body runs on the server, and from [server-side tool use](#server-side-tool-use) where the model provider executes built-in tools remotely.
+这不同于函数体在服务器上运行的普通工具，也不同于模型提供商远程执行内置工具的[服务端工具使用](#server-side-tool-use)。
 
-### When to use headless tools
+### 何时使用无本地实现工具
 
-Use them when the work depends on the **environment, device, or UI** that only exists on the client. For example:
+当工作依赖仅在客户端存在的**环境、设备或界面**时使用。例如：
 
-* **Browser APIs:** Geolocation, IndexedDB, Clipboard, Canvas 2D, file pickers, Battery API, etc.
-* **Privacy and locality:** Data stays on the device (for example, local “memory” in IndexedDB).
-* **Latency:** No extra server round trip for purely local operations.
-* **Structured, safe effects:** Prefer many small, typed tools (for example one tool per canvas primitive) instead of sending arbitrary code to `eval`.
+* **浏览器 API：**Geolocation、IndexedDB、Clipboard、Canvas 2D、文件选择器、Battery API 等。
+* **隐私与本地性：**数据留在设备上（例如 IndexedDB 中的本地“记忆”）。
+* **延迟：**纯本地操作不需要额外的服务器往返请求。
+* **结构化、安全的副作用：**优先使用许多小型、有类型定义的工具（例如每个画布基础操作对应一个工具），而不是向 `eval` 发送任意代码。
 
-### How the pattern works
+### 此模式如何工作
 
-In both runtimes, the model sees a normal tool it can call, but the actual execution happens outside the server process.
+在两种运行时中，模型看到的都是可正常调用的工具，但实际执行发生在服务器进程之外。
 
-1. **Define** a headless tool with `tool(name=..., description=..., args_schema=...)` from `langchain.tools`. A headless tool is schema-only, with no in-process implementation.
-2. **Register** that tool with `create_agent` or your LangGraph graph so the model can call it normally.
-3. **Handle** the interrupt payload when the tool is invoked. Instead of running locally, the graph pauses with a payload shaped like `{"type": "tool", "tool_call": {"id", "name", "args"}}`.
-4. **Resume** the graph after your app, another service, or a human step performs the action. For browser-based flows, you can mirror the schema in the frontend and attach `.implement(...)` there.
+1. 使用 `langchain.tools` 中的 `tool(name=..., description=..., args_schema=...)` **定义**无本地实现工具。此类工具仅有模式，没有进程内实现。
+2. 将工具**注册**到 `create_agent` 或 LangGraph 图，让模型正常调用。
+3. 工具被调用时，**处理**中断负载。图不会在本地执行工具，而会暂停并给出形如 `{"type": "tool", "tool_call": {"id", "name", "args"}}` 的负载。
+4. 应用、其他服务或人工步骤执行操作后，**恢复**图。对于浏览器流程，可在前端镜像同一模式，并在那里附加 `.implement(...)`。
 
 > [!NOTE]
 >
-> If you call `tool(...)` in Python with only `name`, `description`, and `args_schema`, LangChain returns a `HeadlessTool`. There is no `.implement()` API on the Python side.
+> 在 Python 中仅提供 `name`、`description` 和 `args_schema` 调用 `tool(...)` 时，LangChain 返回 `HeadlessTool`。Python 端没有 `.implement()` API。
 
-When the model issues a tool call for one of these tools, the run **interrupts** instead of executing the tool locally. Your app can inspect the payload, perform the action in the right environment (for example a browser, another service, or a human review step), then **resume** the graph with the tool result. When you use the supported JS SDK hooks, they can detect headless-tool interrupts, run the matching client implementation, and submit the resume command for you.
+模型调用这类工具时，运行会**中断**，而不是本地执行工具。应用可以检查负载，在正确环境中执行操作（例如浏览器、其他服务或人工审核步骤），再携带工具结果**恢复**图。使用受支持的 JS SDK 钩子时，它们能够检测这类工具中断，运行匹配的客户端实现，并代你提交恢复命令。
 
-Use the optional **`onTool`** callback to observe lifecycle events (`start`, `success`, `error`) for UI feedback such as spinners or toasts.
+使用可选的 **`onTool`** 回调观察生命周期事件（`start`、`success`、`error`），为加载指示器或提示消息等界面反馈提供依据。
 
-> [card] [Headless tools frontend pattern](https://docs.langchain.com/oss/python/langchain/frontend/headless-tools.md)
+> [card] [无本地实现工具的前端模式](https://docs.langchain.com/oss/python/langchain/frontend/headless-tools.md)
 >
-> See an end-to-end example of schema-only tools executed in the client with `useStream`.
+> 查看使用 `useStream` 在客户端执行仅有模式定义的工具的端到端示例。
 
-## Prebuilt tools
+## 预构建工具
 
-LangChain provides a large collection of prebuilt tools and toolkits for common tasks like web search, code interpretation, database access, and more. These ready-to-use tools can be directly integrated into your agents without writing custom code.
+LangChain 为网页搜索、代码解释、数据库访问等常见任务提供了大量预构建工具和工具包。这些即用型工具可直接集成到智能体，无须编写自定义代码。
 
-See the [tools and toolkits](https://docs.langchain.com/oss/python/integrations/tools.md) integration page for a complete list of available tools organized by category.
+按类别组织的全部可用工具，参见[工具与工具包](https://docs.langchain.com/oss/python/integrations/tools.md)集成页面。
 
-## Tools from MCP servers
+## 来自 MCP 服务器的工具
 
-[Model Context Protocol (MCP)](https://modelcontextprotocol.io) is an open protocol that standardizes how applications expose tools to language models. Rather than hand-authoring a tool, you connect to an MCP server and adapt the tools it advertises into LangChain tools, ready to pass to an agent like any other tool.
+[模型上下文协议（MCP）](https://modelcontextprotocol.io)是一种开放协议，标准化应用向语言模型开放工具的方式。无需手动编写工具，只需连接 MCP 服务器，将其公布的工具适配为 LangChain 工具，就能像其他工具一样传给智能体。
 
-[`MCPAdapter`](https://reference.langchain.com/python/langchain/mcp/adapter/MCPAdapter) discovers a server's tools and converts them into LangChain tools. Open the adapter, call `list_tools()`, and hand the result to [`create_agent`](https://reference.langchain.com/python/langchain/agents/factory/create_agent):
+[`MCPAdapter`](https://reference.langchain.com/python/langchain/mcp/adapter/MCPAdapter) 发现服务器工具并将其转换为 LangChain 工具。打开适配器，调用 `list_tools()`，将结果传给 [`create_agent`](https://reference.langchain.com/python/langchain/agents/factory/create_agent)：
 
 ```python theme={"theme":{"light":"catppuccin-latte","dark":"catppuccin-mocha"}}
 from langchain.agents import create_agent
@@ -1254,18 +1254,18 @@ async with MCPAdapter("https://example.com/mcp") as adapter:
 
 > [!NOTE]
 >
-> The `langchain.mcp` namespace requires `langchain[mcp]>=1.4.0` and is in beta. The API may change.
+> `langchain.mcp` 命名空间需要 `langchain[mcp]>=1.4.0`，目前为测试版，API 可能变化。
 
-For transports, authentication, multiple servers, and handling tool results, see [Model Context Protocol (MCP)](https://docs.langchain.com/oss/python/langchain/mcp.md).
+传输方式、认证、多服务器及工具结果处理，参见[模型上下文协议（MCP）](https://docs.langchain.com/oss/python/langchain/mcp.md)。
 
-## Server-side tool use
+## 服务端工具使用
 
-Some chat models feature built-in tools that are executed server-side by the model provider. These include capabilities like web search and code interpreters that don't require you to define or host the tool logic.
+一些聊天模型具有由模型提供商在服务端执行的内置工具，包括网页搜索、代码解释器等能力，无需自行定义或托管工具逻辑。
 
-Refer to the individual [chat model integration pages](https://docs.langchain.com/oss/python/integrations/providers) and the [tool calling documentation](https://docs.langchain.com/oss/python/langchain/models.md#server-side-tool-use) for details on enabling and using these built-in tools.
+启用和使用这些内置工具的详情，请参阅各个[聊天模型集成页面](https://docs.langchain.com/oss/python/integrations/providers)和[工具调用文档](https://docs.langchain.com/oss/python/langchain/models.md#server-side-tool-use)。
 
 ***
 
-[Connect these docs](https://docs.langchain.com/use-these-docs.md) to your agent of choice via MCP for real-time answers.
+[连接这些文档](https://docs.langchain.com/use-these-docs.md) ，通过 MCP 将其接入你选择的智能体，以获取实时答案。
 
-[Edit this page on GitHub](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/tools.mdx) or [file an issue](https://github.com/langchain-ai/docs/issues/new/choose).
+[在 GitHub 上编辑此页面](https://github.com/langchain-ai/docs/edit/main/src/oss/langchain/tools.mdx) 或[提交问题](https://github.com/langchain-ai/docs/issues/new/choose).
