@@ -33,6 +33,9 @@ if __name__ == "__main__":
             break
         model = create_model()
         context: list = main(question)
+        if not context:
+            print("资料中未提及：知识库中没有与该问题相关的内容。")
+            continue
         system = f"""
 根据上下⽂详细回答。
 仅使用资料中能支持的信息，每项结论附上对应引用 [filename#chunk_index]。

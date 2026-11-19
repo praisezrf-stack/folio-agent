@@ -1,16 +1,28 @@
 <script setup>
-import { computed, nextTick, ref } from 'vue'
-import { askQuestion, uploadDocument } from './api'
+import { computed, nextTick, onMounted, ref } from 'vue'
+import { askQuestion, getDocuments, uploadDocument } from './api'
 
 const documents = ref([])
 const messages = ref([])
 const question = ref('')
 const uploading = ref(false)
+const loadingDocuments = ref(true)
 const sending = ref(false)
 const error = ref('')
 const conversation = ref(null)
 const readyDocuments = computed(() => documents.value.filter(doc => doc.status === 'ready'))
 const suggestions = ['总结这些文档的核心内容', '文档中有哪些重要结论？', '提取文档里的关键数据']
+
+onMounted(async () => {
+  try {
+    const rows = await getDocuments()
+    documents.value = rows.map(([name]) => ({ name, status: 'saved' }))
+  } catch (err) {
+    error.value = err.message
+  } finally {
+    loadingDocuments.value = false
+  }
+})
 
 async function scrollToBottom() {
   await nextTick()
@@ -74,22 +86,23 @@ function clearChat() {
     <aside class="sidebar">
       <a class="brand" href="./"><span class="brand-mark">f.</span> folio<span class="brand-tag">知识工作台</span></a>
 
-      <div class="sidebar-heading"><span>我的文档</span><span class="count">{{ readyDocuments.length }}</span></div>
+      <div class="sidebar-heading"><span>我的文档</span><span class="count">{{ documents.filter(doc => doc.status !== 'error').length }}</span></div>
       <p class="sidebar-description">让知识有迹可循，让答案有所依据。</p>
 
       <label class="upload-zone" :class="{ busy: uploading }">
-        <input type="file" multiple :disabled="uploading" @change="uploadFiles" />
+        <input type="file" multiple :disabled="uploading || loadingDocuments" @change="uploadFiles" />
         <span class="upload-icon" aria-hidden="true">↑</span>
         <strong>{{ uploading ? '正在上传文档…' : '点击上传文档' }}</strong>
         <span>支持一次选择多个文件</span>
       </label>
 
-      <div v-if="!documents.length" class="documents-empty">还没有文档<br /><span>上传后，就可以开始提问了</span></div>
+      <div v-if="loadingDocuments" class="documents-empty">正在加载文档…</div>
+      <div v-else-if="!documents.length" class="documents-empty">还没有文档<br /><span>上传后，就可以开始提问了</span></div>
       <ul v-else class="document-list">
         <li v-for="(doc, index) in documents" :key="index" class="document">
           <span class="file-icon" aria-hidden="true">▤</span>
-          <div class="file-info"><strong :title="doc.name">{{ doc.name }}</strong><span>{{ (doc.size / 1024).toFixed(1) }} KB</span></div>
-          <span class="file-status" :class="doc.status">{{ { ready: '就绪', uploading: '上传中', error: '失败' }[doc.status] }}</span>
+          <div class="file-info"><strong :title="doc.name">{{ doc.name }}</strong><span>{{ doc.size == null ? '历史文档' : `${(doc.size / 1024).toFixed(1)} KB` }}</span></div>
+          <span class="file-status" :class="doc.status">{{ { ready: '已上传', saved: '已保存', uploading: '上传中', error: '失败' }[doc.status] }}</span>
         </li>
       </ul>
       <div class="sidebar-footer"><span class="small-spark">✧</span><div><strong>基于你的文档回答</strong><p>检索相关内容，保留参考来源</p></div></div>

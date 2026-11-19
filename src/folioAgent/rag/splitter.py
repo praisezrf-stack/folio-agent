@@ -21,7 +21,7 @@ def embed_fn(chunks):
 # 切片
 def splitter_loader(content):
     # 正则匹配，去掉content中的\\_，因为thread_id会被转成thread\\_id
-    content = re.sub(r"\\+_", "_", content)
+    content = re.sub(r"\\+([\`_*$$$$])", r"\1", content)  # ← 新增这一行
     md_splitter = ExperimentalMarkdownSyntaxTextSplitter(
         headers_to_split_on=[
             ("#", "一级标题"),
@@ -47,6 +47,7 @@ def splitter_loader(content):
     )
     docs = md_splitter.split_text(content)
     embedded_chunks = []
+    seen = set()
     for doc in docs:
         headings = [
             doc.metadata.get("一级标题", ""),
@@ -59,9 +60,17 @@ def splitter_loader(content):
         if len(page_content) > 1200 and "Code" not in doc.metadata:
             chunks = splitter.split_text(page_content)
         else:
+
             chunks = [page_content]
         for chunk in chunks:
             chunk_content = prefix + chunk
+            if len(page_content.strip()) < 80:  # 太小的chunk丢弃
+                continue
+            # 去重
+            key = re.sub(r"\s+", " ", chunk_content)
+            if key in seen:
+                continue
+            seen.add(key)
             embedded_chunks.append(
                 {
                     "vector": embed_fn(chunk_content),
