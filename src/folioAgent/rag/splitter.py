@@ -60,11 +60,10 @@ def splitter_loader(content):
         if len(page_content) > 1200 and "Code" not in doc.metadata:
             chunks = splitter.split_text(page_content)
         else:
-
             chunks = [page_content]
         for chunk in chunks:
             chunk_content = prefix + chunk
-            if len(page_content.strip()) < 80:  # 太小的chunk丢弃
+            if len(chunk_content.strip()) < 80:  # 太小的chunk丢弃
                 continue
             # 去重
             key = re.sub(r"\s+", " ", chunk_content)

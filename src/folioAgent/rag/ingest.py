@@ -10,17 +10,15 @@
 from folioAgent.rag.parser import parser
 from folioAgent.rag.splitter import splitter_loader
 from folioAgent.db.ingestion_repository import save_chunks, save_doc
-from folioAgent.db.store import get_db_connect
+from folioAgent.db.store import db_server
 
-# from folioAgent.llm.gateway import get_embedder, create_model
 from folioAgent.config import get_doc
 from pathlib import Path
 
 
 def parse_doc(upload_url):
-    with get_db_connect() as conn:
-        document_ids = save_doc(conn, upload_url)
-        print("=== 文档存储完成 ===", document_ids)
+    document_ids:list = save_doc(upload_url)
+    print("=== 文档存储完成 ===", document_ids)
     n_md = []
     content_list = []
     for index, file in enumerate(upload_url):
@@ -50,7 +48,7 @@ def parse_doc(upload_url):
         embedded_chunks = splitter_loader(content["content"])
         data = [
             (
-                content['data_id'],
+                content["data_id"],
                 chunk["chunk_content"],
                 str(chunk["vector"]),
                 index,
@@ -58,8 +56,7 @@ def parse_doc(upload_url):
             for index, chunk in enumerate(embedded_chunks)
         ]
         # 存储chunk
-        with get_db_connect() as conn:
-            save_chunks(conn, data)
+        save_chunks(data)
 
 
 if __name__ == "__main__":

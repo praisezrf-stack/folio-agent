@@ -11,19 +11,18 @@ Prompt 三条铁律（企业级 RAG 底线，也是面试差异化点）：
 """
 
 from folioAgent.llm.gateway import get_embedder, create_model
-from folioAgent.db.store import get_db_connect
+from folioAgent.db.store import db_server
 from langchain_core.messages import ChatMessage, HumanMessage, SystemMessage
 from folioAgent.db.ingestion_repository import find_chunks
 
 
 emb = None
-def main(question):
+def main(question)->list:
     global emb
     if not emb:
         emb = get_embedder()
     emb_result = emb.embed_query(question)
-    with get_db_connect() as conn:
-        return find_chunks(conn, emb_result)
+    return find_chunks(emb_result)
 
 
 if __name__ == "__main__":
